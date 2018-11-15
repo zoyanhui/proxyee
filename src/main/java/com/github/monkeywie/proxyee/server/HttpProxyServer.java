@@ -6,6 +6,7 @@ import com.github.monkeywie.proxyee.exception.HttpProxyExceptionHandle;
 import com.github.monkeywie.proxyee.handler.HttpProxyServerHandle;
 import com.github.monkeywie.proxyee.intercept.HttpProxyInterceptInitializer;
 import com.github.monkeywie.proxyee.proxy.ProxyConfig;
+import com.github.monkeywie.proxyee.proxy.ProxyHandleFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -71,6 +72,7 @@ public class HttpProxyServer {
         serverConfig.setServerPriKey(keyPair.getPrivate());
         serverConfig.setServerPubKey(keyPair.getPublic());
       } catch (Exception e) {
+        System.err.println(e.getMessage() + ". " + e.getStackTrace());
         serverConfig.setHandleSsl(false);
       }
     }
@@ -79,6 +81,9 @@ public class HttpProxyServer {
     }
     if (httpProxyExceptionHandle == null) {
       httpProxyExceptionHandle = new HttpProxyExceptionHandle();
+    }
+    if(proxyConfig != null){
+      ProxyHandleFactory.init(proxyConfig);
     }
   }
 
@@ -118,7 +123,7 @@ public class HttpProxyServer {
       b.group(bossGroup, workerGroup)
           .channel(NioServerSocketChannel.class)
 //          .option(ChannelOption.SO_BACKLOG, 100)
-          .handler(new LoggingHandler(LogLevel.DEBUG))
+          .handler(new LoggingHandler(LogLevel.INFO))
           .childHandler(new ChannelInitializer<Channel>() {
 
             @Override
